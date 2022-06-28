@@ -15,5 +15,5 @@ jobs:
         password: ${{ secrets.DOCKERHUB_TOKEN }}
     - name: Checkout
       run: |
-         chmod +x ./script.sh
-         sh script.sh
+         ./script.sh
+      shell: bash
