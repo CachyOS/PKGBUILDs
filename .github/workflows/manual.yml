@@ -1,6 +1,7 @@
 name: PKGBUILD CI
 on:
   workflow_dispatch:
+    branches: [ "aur-rebased-cachyos" ]
 
 jobs:
   pkgbuild:
