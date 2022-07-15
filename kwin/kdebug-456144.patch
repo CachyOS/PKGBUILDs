@@ -1,0 +1,45 @@
+From 524e65813b78e59115a2345fd8b438171d9b0aac Mon Sep 17 00:00:00 2001
+From: Felipe Kinoshita <kinofhek@gmail.com>
+Date: Thu, 30 Jun 2022 20:23:17 +0000
+Subject: [PATCH] effects/desktopgrid: Close windows on middle click
+
+This makes it so that the windowview/overview/desktopgrid effects
+all use the middle mouse button to close windows.
+
+The previous behavior of pinning window is now assigned to the
+right mouse button.
+
+BUG: 456144
+---
+ src/effects/desktopgrid/qml/DesktopView.qml | 15 ++++++++-------
+ 1 file changed, 8 insertions(+), 7 deletions(-)
+
+diff --git a/src/effects/desktopgrid/qml/DesktopView.qml b/src/effects/desktopgrid/qml/DesktopView.qml
+index 4d88ac9e99..d75734ce26 100644
+--- a/src/effects/desktopgrid/qml/DesktopView.qml
++++ b/src/effects/desktopgrid/qml/DesktopView.qml
+@@ -121,13 +121,14 @@ DropArea {
+         }
+         onActivated: effect.deactivate(effect.animationDuration);
+         onWindowClicked: {
+-            if (eventPoint.event.button !== Qt.MiddleButton) {
+-                return;
+-            }
+-            if (window.desktop > -1) {
+-                window.desktop = -1;
+-            } else {
+-                window.desktop = desktopView.desktop.x11DesktopNumber;
++            if (eventPoint.event.button === Qt.MiddleButton) {
++                window.closeWindow();
++            } else if (eventPoint.event.button === Qt.RightButton) {
++                if (window.desktop > -1) {
++                    window.desktop = -1;
++                } else {
++                    window.desktop = desktopView.desktop.x11DesktopNumber;
++                }
+             }
+         }
+         Behavior on x {
+-- 
+GitLab
+

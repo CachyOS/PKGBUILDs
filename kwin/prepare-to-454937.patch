@@ -1,0 +1,30 @@
+From e04d9e1978f90229d2d8a410e1cb74265812fe88 Mon Sep 17 00:00:00 2001
+From: Aleix Pol Gonzalez <aleixpol@kde.org>
+Date: Fri, 1 Jul 2022 13:07:12 +0000
+Subject: [PATCH] xdgactivation: Do not notify when applications try to
+ activate themselves
+
+There are some cases where this might happen, there's not much to
+notify there anyway as it's more of an implementation detail.
+---
+ src/xdgactivationv1.cpp | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/src/xdgactivationv1.cpp b/src/xdgactivationv1.cpp
+index 6ecbcc65d4..399e416797 100644
+--- a/src/xdgactivationv1.cpp
++++ b/src/xdgactivationv1.cpp
+@@ -77,7 +77,9 @@ QString XdgActivationV1Integration::requestToken(bool isPrivileged, SurfaceInter
+     QIcon icon;
+     if (const QString desktopFilePath = Window::findDesktopFile(appId); !desktopFilePath.isEmpty()) {
+         KDesktopFile df(desktopFilePath);
+-        showNotify |= df.desktopGroup().readEntry("StartupNotify", true) || df.desktopGroup().readEntry("X-KDE-StartupNotify", true);
++        Window *window = Workspace::self()->activeWindow();
++        showNotify = (!window || appId != window->desktopFileName())
++            && (df.desktopGroup().readEntry("StartupNotify", true) || df.desktopGroup().readEntry("X-KDE-StartupNotify", true));
+         icon = QIcon::fromTheme(df.readIcon(), QIcon::fromTheme(QStringLiteral("system-run")));
+     }
+     m_currentActivationToken.reset(new ActivationToken{newToken, isPrivileged, surface, serial, seat, appId, showNotify, waylandServer()->plasmaActivationFeedback()->createActivation(appId)});
+-- 
+GitLab
+

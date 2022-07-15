@@ -1,0 +1,70 @@
+From c49620658f24dde055c053cfa1aac6b22997b0d0 Mon Sep 17 00:00:00 2001
+From: David Edmundson <kde@davidedmundson.co.uk>
+Date: Fri, 8 Jul 2022 12:34:22 +0000
+Subject: [PATCH] Create large enough atlas texture for decorations
+
+When we render individual component of a decoration into an atlas we
+ceil the positions for the individual component parts so they don't risk
+overlapping. See SceneOpenGLDecorationRenderer::render
+
+This isn't done when we set the overall texture height. This can cause
+the bottommost part of the atlas (the right edge) to go out of view.
+
+BUG: 453745
+---
+ src/scenes/opengl/scene_opengl.cpp | 14 +++++++++-----
+ src/scenes/opengl/scene_opengl.h   |  1 +
+ 2 files changed, 10 insertions(+), 5 deletions(-)
+
+diff --git a/src/scenes/opengl/scene_opengl.cpp b/src/scenes/opengl/scene_opengl.cpp
+index a0ecfbe2ba..f5c9e152b7 100644
+--- a/src/scenes/opengl/scene_opengl.cpp
++++ b/src/scenes/opengl/scene_opengl.cpp
+@@ -861,7 +861,7 @@ void SceneOpenGLDecorationRenderer::renderPart(const QRect &rect, const QRect &p
+     int verticalPadding = padding.top() + padding.bottom();
+     int horizontalPadding = padding.left() + padding.right();
+ 
+-    QSize imageSize = rect.size() * devicePixelRatio;
++    QSize imageSize(toNativeSize(rect.width()), toNativeSize(rect.height()));
+     if (rotated) {
+         imageSize = QSize(imageSize.height(), imageSize.width());
+     }
+@@ -931,10 +931,9 @@ void SceneOpenGLDecorationRenderer::resizeTexture()
+     client()->window()->layoutDecorationRects(left, top, right, bottom);
+     QSize size;
+ 
+-    size.rwidth() = qMax(qMax(top.width(), bottom.width()),
+-                         qMax(left.height(), right.height()));
+-    size.rheight() = top.height() + bottom.height() + left.width() + right.width();
+-    size *= effectiveDevicePixelRatio();
++    size.rwidth() = toNativeSize(qMax(qMax(top.width(), bottom.width()),
++                                      qMax(left.height(), right.height())));
++    size.rheight() = toNativeSize(top.height()) + toNativeSize(bottom.height()) + toNativeSize(left.width()) + toNativeSize(right.width());
+ 
+     size.rheight() += 4 * (2 * TexturePad);
+     size.rwidth() += 2 * TexturePad;
+@@ -954,4 +953,9 @@ void SceneOpenGLDecorationRenderer::resizeTexture()
+     }
+ }
+ 
++int SceneOpenGLDecorationRenderer::toNativeSize(int size) const
++{
++    return std::ceil(size * effectiveDevicePixelRatio());
++}
++
+ } // namespace
+diff --git a/src/scenes/opengl/scene_opengl.h b/src/scenes/opengl/scene_opengl.h
+index 2f3b04cf86..31842258e6 100644
+--- a/src/scenes/opengl/scene_opengl.h
++++ b/src/scenes/opengl/scene_opengl.h
+@@ -146,6 +146,7 @@ private:
+     void renderPart(const QRect &rect, const QRect &partRect, const QPoint &textureOffset, qreal devicePixelRatio, bool rotated = false);
+     static const QMargins texturePadForPart(const QRect &rect, const QRect &partRect);
+     void resizeTexture();
++    int toNativeSize(int size) const;
+     QScopedPointer<GLTexture> m_texture;
+ };
+ 
+-- 
+GitLab
+

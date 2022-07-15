@@ -1,0 +1,37 @@
+From 155b3cd4907e619e2ae0ec4feca873a213f839d0 Mon Sep 17 00:00:00 2001
+From: Aleix Pol <aleixpol@kde.org>
+Date: Wed, 29 Jun 2022 21:37:52 +0200
+Subject: [PATCH] xdgactivation: Properly prevent disabled activation
+ notifications
+
+The logic when checking the settings was wrong and it would always
+notify unless both keys were actually disabled.
+
+BUG: 454937
+
+
+(cherry picked from commit 78d80123f1d2efbfa00733390430ce381db9c245)
+---
+ src/xdgactivationv1.cpp | 6 ++++--
+ 1 file changed, 4 insertions(+), 2 deletions(-)
+
+diff --git a/src/xdgactivationv1.cpp b/src/xdgactivationv1.cpp
+index ed5c7fa4e6..17ac4c45d4 100644
+--- a/src/xdgactivationv1.cpp
++++ b/src/xdgactivationv1.cpp
+@@ -79,8 +79,10 @@ QString XdgActivationV1Integration::requestToken(bool isPrivileged, SurfaceInter
+     if (const QString desktopFilePath = Window::findDesktopFile(appId); !desktopFilePath.isEmpty()) {
+         KDesktopFile df(desktopFilePath);
+         Window *window = Workspace::self()->activeWindow();
+-        showNotify = (!window || appId != window->desktopFileName())
+-            && (df.desktopGroup().readEntry("StartupNotify", true) || df.desktopGroup().readEntry("X-KDE-StartupNotify", true));
++        if (!window || appId != window->desktopFileName()) {
++            const auto desktop = df.desktopGroup();
++            showNotify = desktop.readEntry("X-KDE-StartupNotify", desktop.readEntry("StartupNotify", true));
++        }
+         icon = QIcon::fromTheme(df.readIcon(), QIcon::fromTheme(QStringLiteral("system-run")));
+     }
+     m_currentActivationToken.reset(new ActivationToken{newToken, isPrivileged, surface, serial, seat, appId, showNotify, pwActivation});
+-- 
+GitLab
+

@@ -1,0 +1,58 @@
+From b079c8caa23f8b40733a45159f51607928596a4b Mon Sep 17 00:00:00 2001
+From: Marco Martin <notmart@gmail.com>
+Date: Fri, 1 Jul 2022 12:13:18 +0000
+Subject: [PATCH] Set all timestamps for all touch events
+
+in order for qml pointerhandlers to work correctly, they need
+timestamps in all events (to decide for instance when to emit a
+tapped or doubletapped)
+
+BUG:456133
+
+
+(cherry picked from commit 56d3b2ddc44c5a3590bbfd4bb9dc6cdd4be853c0)
+---
+ src/libkwineffects/kwinoffscreenquickview.cpp | 6 ++----
+ 1 file changed, 2 insertions(+), 4 deletions(-)
+
+diff --git a/src/libkwineffects/kwinoffscreenquickview.cpp b/src/libkwineffects/kwinoffscreenquickview.cpp
+index 12be81cef1..47a44c6a5b 100644
+--- a/src/libkwineffects/kwinoffscreenquickview.cpp
++++ b/src/libkwineffects/kwinoffscreenquickview.cpp
+@@ -378,8 +378,6 @@ bool OffscreenQuickView::forwardTouchDown(qint32 id, const QPointF &pos, quint32
+ 
+ bool OffscreenQuickView::forwardTouchMotion(qint32 id, const QPointF &pos, quint32 time)
+ {
+-    Q_UNUSED(time)
+-
+     d->updateTouchState(Qt::TouchPointMoved, id, pos);
+ 
+ #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+@@ -387,6 +385,7 @@ bool OffscreenQuickView::forwardTouchMotion(qint32 id, const QPointF &pos, quint
+ #else
+     QTouchEvent event(QEvent::TouchUpdate, d->touchDevice, Qt::NoModifier, d->touchPoints);
+ #endif
++    event.setTimestamp(time);
+     QCoreApplication::sendEvent(d->m_view, &event);
+ 
+     return event.isAccepted();
+@@ -394,8 +393,6 @@ bool OffscreenQuickView::forwardTouchMotion(qint32 id, const QPointF &pos, quint
+ 
+ bool OffscreenQuickView::forwardTouchUp(qint32 id, quint32 time)
+ {
+-    Q_UNUSED(time)
+-
+     d->updateTouchState(Qt::TouchPointReleased, id, QPointF{});
+ 
+ #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+@@ -403,6 +400,7 @@ bool OffscreenQuickView::forwardTouchUp(qint32 id, quint32 time)
+ #else
+     QTouchEvent event(QEvent::TouchEnd, d->touchDevice, Qt::NoModifier, d->touchPoints);
+ #endif
++    event.setTimestamp(time);
+     QCoreApplication::sendEvent(d->m_view, &event);
+ 
+     return event.isAccepted();
+-- 
+GitLab
+

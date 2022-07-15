@@ -1,0 +1,51 @@
+From d4d4a05444e18963359f3fa6fe482ed6a419aa19 Mon Sep 17 00:00:00 2001
+From: Xaver Hugl <xaver.hugl@gmail.com>
+Date: Wed, 29 Jun 2022 20:52:05 +0200
+Subject: [PATCH] backends/drm: fix common mode generation
+
+The unit for refresh rate was wrong, which caused insanely high as well
+as negative refresh rates
+
+BUG: 455477
+(cherry picked from commit 0c453739b1da4f0e0075fdaf2894e70b17271ef4)
+---
+ src/backends/drm/drm_object_connector.cpp | 4 ++--
+ src/backends/drm/drm_object_connector.h   | 2 +-
+ 2 files changed, 3 insertions(+), 3 deletions(-)
+
+diff --git a/src/backends/drm/drm_object_connector.cpp b/src/backends/drm/drm_object_connector.cpp
+index a59031cb7b..6847dd35a6 100644
+--- a/src/backends/drm/drm_object_connector.cpp
++++ b/src/backends/drm/drm_object_connector.cpp
+@@ -434,13 +434,13 @@ QList<QSharedPointer<DrmConnectorMode>> DrmConnector::generateCommonModes()
+             return mode->size() == size;
+         });
+         if (it == m_driverModes.constEnd() && size.width() <= maxSize.width() && size.height() <= maxSize.height() && bandwidthEstimation < maxBandwidthEstimation) {
+-            ret << generateMode(size, 60000);
++            ret << generateMode(size, 60);
+         }
+     }
+     return ret;
+ }
+ 
+-QSharedPointer<DrmConnectorMode> DrmConnector::generateMode(const QSize &size, uint32_t refreshRate)
++QSharedPointer<DrmConnectorMode> DrmConnector::generateMode(const QSize &size, float refreshRate)
+ {
+     auto modeInfo = libxcvt_gen_mode_info(size.width(), size.height(), refreshRate, false, false);
+ 
+diff --git a/src/backends/drm/drm_object_connector.h b/src/backends/drm/drm_object_connector.h
+index 162cb9ee11..77fb68bc27 100644
+--- a/src/backends/drm/drm_object_connector.h
++++ b/src/backends/drm/drm_object_connector.h
+@@ -106,7 +106,7 @@ public:
+ 
+ private:
+     QList<QSharedPointer<DrmConnectorMode>> generateCommonModes();
+-    QSharedPointer<DrmConnectorMode> generateMode(const QSize &size, uint32_t refreshRate);
++    QSharedPointer<DrmConnectorMode> generateMode(const QSize &size, float refreshRate);
+ 
+     QScopedPointer<DrmPipeline> m_pipeline;
+     DrmScopedPointer<drmModeConnector> m_conn;
+-- 
+GitLab
+

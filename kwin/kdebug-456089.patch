@@ -1,0 +1,153 @@
+From e10ecec362bd0bb39d10ad17d4ac6e4f921254db Mon Sep 17 00:00:00 2001
+From: Xaver Hugl <xaver.hugl@gmail.com>
+Date: Tue, 28 Jun 2022 23:18:22 +0200
+Subject: [PATCH] backends/drm: suppress logging for direct scanout
+
+BUG: 456089
+
+
+(cherry picked from commit ef97158f9633fb1fc6489e540b273e533e861004)
+---
+ src/backends/drm/drm_buffer.cpp              |  1 -
+ src/backends/drm/drm_lease_egl_gbm_layer.cpp |  3 +++
+ src/backends/drm/drm_qpainter_layer.cpp      | 13 +++++++++++
+ src/backends/drm/egl_gbm_layer_surface.cpp   | 24 ++++++++++++++++----
+ 4 files changed, 36 insertions(+), 5 deletions(-)
+
+diff --git a/src/backends/drm/drm_buffer.cpp b/src/backends/drm/drm_buffer.cpp
+index ecdf5dbe4e..feca9fa5a7 100644
+--- a/src/backends/drm/drm_buffer.cpp
++++ b/src/backends/drm/drm_buffer.cpp
+@@ -150,7 +150,6 @@ std::shared_ptr<DrmFramebuffer> DrmFramebuffer::createFramebuffer(const std::sha
+     if (ret == 0) {
+         return std::make_shared<DrmFramebuffer>(buffer, framebufferId);
+     } else {
+-        qCWarning(KWIN_DRM) << "Could not create drm framebuffer!" << strerror(errno);
+         return nullptr;
+     }
+ }
+diff --git a/src/backends/drm/drm_lease_egl_gbm_layer.cpp b/src/backends/drm/drm_lease_egl_gbm_layer.cpp
+index a9facf2e29..7ee69266f9 100644
+--- a/src/backends/drm/drm_lease_egl_gbm_layer.cpp
++++ b/src/backends/drm/drm_lease_egl_gbm_layer.cpp
+@@ -47,6 +47,9 @@ bool DrmLeaseEglGbmLayer::checkTestBuffer()
+         }
+         if (newBo) {
+             m_framebuffer = DrmFramebuffer::createFramebuffer(std::make_shared<GbmBuffer>(m_pipeline->gpu(), newBo));
++            if (!m_framebuffer) {
++                qCWarning(KWIN_DRM, "Failed to create gbm framebuffer for lease output: %s", strerror(errno));
++            }
+         } else {
+             qCWarning(KWIN_DRM) << "Failed to create gbm_bo for lease output";
+         }
+diff --git a/src/backends/drm/drm_qpainter_layer.cpp b/src/backends/drm/drm_qpainter_layer.cpp
+index 007de40286..543f820fae 100644
+--- a/src/backends/drm/drm_qpainter_layer.cpp
++++ b/src/backends/drm/drm_qpainter_layer.cpp
+@@ -16,6 +16,7 @@
+ #include "drm_pipeline.h"
+ #include "drm_virtual_output.h"
+ #include "dumb_swapchain.h"
++#include "logging.h"
+ #include "scene_qpainter_drm_backend.h"
+ 
+ #include <drm_fourcc.h>
+@@ -49,6 +50,9 @@ bool DrmQPainterLayer::endFrame(const QRegion &renderedRegion, const QRegion &da
+     m_currentDamage = damagedRegion;
+     m_swapchain->releaseBuffer(m_swapchain->currentBuffer(), damagedRegion);
+     m_currentFramebuffer = DrmFramebuffer::createFramebuffer(m_swapchain->currentBuffer());
++    if (!m_currentFramebuffer) {
++        qCWarning(KWIN_DRM, "Failed to create dumb framebuffer: %s", strerror(errno));
++    }
+     return m_currentFramebuffer != nullptr;
+ }
+ 
+@@ -58,6 +62,9 @@ bool DrmQPainterLayer::checkTestBuffer()
+         m_swapchain = std::make_shared<DumbSwapchain>(m_pipeline->gpu(), m_pipeline->bufferSize(), DRM_FORMAT_XRGB8888);
+         if (!m_swapchain->isEmpty()) {
+             m_currentFramebuffer = DrmFramebuffer::createFramebuffer(m_swapchain->currentBuffer());
++            if (!m_currentFramebuffer) {
++                qCWarning(KWIN_DRM, "Failed to create dumb framebuffer: %s", strerror(errno));
++            }
+         } else {
+             m_currentFramebuffer.reset();
+         }
+@@ -110,6 +117,9 @@ bool DrmCursorQPainterLayer::endFrame(const QRegion &damagedRegion, const QRegio
+     Q_UNUSED(renderedRegion)
+     m_swapchain->releaseBuffer(m_swapchain->currentBuffer(), damagedRegion);
+     m_currentFramebuffer = DrmFramebuffer::createFramebuffer(m_swapchain->currentBuffer());
++    if (!m_currentFramebuffer) {
++        qCWarning(KWIN_DRM, "Failed to create dumb framebuffer for the cursor: %s", strerror(errno));
++    }
+     return m_currentFramebuffer != nullptr;
+ }
+ 
+@@ -177,6 +187,9 @@ bool DrmLeaseQPainterLayer::checkTestBuffer()
+         m_buffer = DrmDumbBuffer::createDumbBuffer(m_pipeline->gpu(), size, DRM_FORMAT_XRGB8888);
+         if (m_buffer) {
+             m_framebuffer = DrmFramebuffer::createFramebuffer(m_buffer);
++            if (!m_framebuffer) {
++                qCWarning(KWIN_DRM, "Failed to create dumb framebuffer for lease output: %s", strerror(errno));
++            }
+         } else {
+             m_framebuffer.reset();
+         }
+diff --git a/src/backends/drm/egl_gbm_layer_surface.cpp b/src/backends/drm/egl_gbm_layer_surface.cpp
+index 3782a90a2e..bea2c62601 100644
+--- a/src/backends/drm/egl_gbm_layer_surface.cpp
++++ b/src/backends/drm/egl_gbm_layer_surface.cpp
+@@ -129,7 +129,11 @@ std::optional<std::tuple<std::shared_ptr<DrmFramebuffer>, QRegion>> EglGbmLayerS
+     if (m_gpu == m_eglBackend->gpu()) {
+         if (const auto buffer = m_gbmSurface->swapBuffers(damagedRegion)) {
+             m_currentBuffer = buffer;
+-            return std::tuple(DrmFramebuffer::createFramebuffer(buffer), damagedRegion);
++            auto ret = DrmFramebuffer::createFramebuffer(buffer);
++            if (!ret) {
++                qCWarning(KWIN_DRM, "Failed to create framebuffer for EglGbmLayerSurface: %s", strerror(errno));
++            }
++            return std::tuple(ret, damagedRegion);
+         }
+     } else {
+         if (const auto gbmBuffer = m_gbmSurface->swapBuffers(damagedRegion)) {
+@@ -282,7 +286,11 @@ std::shared_ptr<DrmFramebuffer> EglGbmLayerSurface::importDmabuf()
+         qCWarning(KWIN_DRM, "failed to import gbm_bo for multi-gpu usage: %s", strerror(errno));
+         return nullptr;
+     }
+-    return DrmFramebuffer::createFramebuffer(imported);
++    const auto ret = DrmFramebuffer::createFramebuffer(imported);
++    if (!ret) {
++        qCWarning(KWIN_DRM, "Failed to create framebuffer for multi-gpu: %s", strerror(errno));
++    }
++    return ret;
+ }
+ 
+ std::shared_ptr<DrmFramebuffer> EglGbmLayerSurface::importWithCpu()
+@@ -313,7 +321,11 @@ std::shared_ptr<DrmFramebuffer> EglGbmLayerSurface::importWithCpu()
+     if (!memcpy(importBuffer->data(), m_currentBuffer->mappedData(), importBuffer->size().height() * importBuffer->strides()[0])) {
+         return nullptr;
+     }
+-    return DrmFramebuffer::createFramebuffer(importBuffer);
++    const auto ret = DrmFramebuffer::createFramebuffer(importBuffer);
++    if (!ret) {
++        qCWarning(KWIN_DRM, "Failed to create framebuffer for CPU import: %s", strerror(errno));
++    }
++    return ret;
+ }
+ 
+ bool EglGbmLayerSurface::doesSwapchainFit(DumbSwapchain *swapchain) const
+@@ -364,7 +376,11 @@ std::shared_ptr<DrmFramebuffer> EglGbmLayerSurface::renderTestBuffer(const QSize
+                 return nullptr;
+             }
+         }
+-        return DrmFramebuffer::createFramebuffer(m_currentBuffer);
++        const auto ret = DrmFramebuffer::createFramebuffer(m_currentBuffer);
++        if (!ret) {
++            qCWarning(KWIN_DRM, "Failed to create framebuffer for testing: %s", strerror(errno));
++        }
++        return ret;
+     } else {
+         return nullptr;
+     }
+-- 
+GitLab
+

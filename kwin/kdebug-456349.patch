@@ -1,0 +1,91 @@
+From 06db7fc7ff9631d6b4e8520d1817ad26da5ee89f Mon Sep 17 00:00:00 2001
+From: David Edmundson <kde@davidedmundson.co.uk>
+Date: Thu, 7 Jul 2022 17:01:52 +0100
+Subject: [PATCH] Map XdgSurface to XdgWMBase instances properly
+
+xdg_wm_base is a global that with a single instance in our high level
+wrapper. Our surface wrapper needs to get the xdg_wm_base::Resource
+instance on occastion.
+
+Currently we go via wl_client for the mapping, but this breaks down
+should a client bind wm_base twice.
+
+BUG: 456349
+---
+ src/wayland/xdgshell_interface.cpp | 18 ++++--------------
+ src/wayland/xdgshell_interface_p.h |  3 +--
+ 2 files changed, 5 insertions(+), 16 deletions(-)
+
+diff --git a/src/wayland/xdgshell_interface.cpp b/src/wayland/xdgshell_interface.cpp
+index 876214a66f..d60099e45f 100644
+--- a/src/wayland/xdgshell_interface.cpp
++++ b/src/wayland/xdgshell_interface.cpp
+@@ -23,24 +23,14 @@ XdgShellInterfacePrivate::XdgShellInterfacePrivate(XdgShellInterface *shell)
+ {
+ }
+ 
+-static wl_client *clientFromXdgSurface(XdgSurfaceInterface *surface)
+-{
+-    return XdgSurfaceInterfacePrivate::get(surface)->resource()->client();
+-}
+-
+ XdgShellInterfacePrivate::Resource *XdgShellInterfacePrivate::resourceForXdgSurface(XdgSurfaceInterface *surface) const
+ {
+-    return resourceMap().value(clientFromXdgSurface(surface));
+-}
+-
+-void XdgShellInterfacePrivate::registerXdgSurface(XdgSurfaceInterface *surface)
+-{
+-    xdgSurfaces.insert(clientFromXdgSurface(surface), surface);
++    return xdgSurfaces.value(surface);
+ }
+ 
+ void XdgShellInterfacePrivate::unregisterXdgSurface(XdgSurfaceInterface *surface)
+ {
+-    xdgSurfaces.remove(clientFromXdgSurface(surface), surface);
++    xdgSurfaces.remove(surface);
+ }
+ 
+ /**
+@@ -71,7 +61,7 @@ XdgShellInterfacePrivate *XdgShellInterfacePrivate::get(XdgShellInterface *shell
+ 
+ void XdgShellInterfacePrivate::xdg_wm_base_destroy(Resource *resource)
+ {
+-    if (xdgSurfaces.contains(resource->client())) {
++    if (xdgSurfaces.key(resource)) {
+         wl_resource_post_error(resource->handle, error_defunct_surfaces, "xdg_wm_base was destroyed before children");
+         return;
+     }
+@@ -96,7 +86,7 @@ void XdgShellInterfacePrivate::xdg_wm_base_get_xdg_surface(Resource *resource, u
+     wl_resource *xdgSurfaceResource = wl_resource_create(resource->client(), &xdg_surface_interface, resource->version(), id);
+ 
+     XdgSurfaceInterface *xdgSurface = new XdgSurfaceInterface(q, surface, xdgSurfaceResource);
+-    registerXdgSurface(xdgSurface);
++    xdgSurfaces.insert(xdgSurface, resource);
+ }
+ 
+ void XdgShellInterfacePrivate::xdg_wm_base_pong(Resource *resource, uint32_t serial)
+diff --git a/src/wayland/xdgshell_interface_p.h b/src/wayland/xdgshell_interface_p.h
+index c8294a2bf6..a68600a8d5 100644
+--- a/src/wayland/xdgshell_interface_p.h
++++ b/src/wayland/xdgshell_interface_p.h
+@@ -23,7 +23,6 @@ public:
+ 
+     Resource *resourceForXdgSurface(XdgSurfaceInterface *surface) const;
+ 
+-    void registerXdgSurface(XdgSurfaceInterface *surface);
+     void unregisterXdgSurface(XdgSurfaceInterface *surface);
+ 
+     void registerPing(quint32 serial);
+@@ -41,7 +40,7 @@ protected:
+     void xdg_wm_base_pong(Resource *resource, uint32_t serial) override;
+ 
+ private:
+-    QMultiMap<wl_client *, XdgSurfaceInterface *> xdgSurfaces;
++    QHash<XdgSurfaceInterface *, Resource *> xdgSurfaces;
+ };
+ 
+ class XdgPositionerData : public QSharedData
+-- 
+GitLab
+

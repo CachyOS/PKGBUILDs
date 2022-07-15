@@ -8,7 +8,7 @@
 
 pkgname=kwin
 pkgver=5.25.2
-pkgrel=1.3
+pkgrel=2.3
 pkgdesc='An easy to use, but flexible, composited Window Manager'
 arch=(x86_64)
 url='https://kde.org/plasma-desktop/'
@@ -20,7 +20,6 @@ optdepends=('maliit-keyboard: virtual keyboard for kwin-wayland')
 replaces=(kwayland-server)
 groups=(plasma)
 source=(https://download.kde.org/stable/plasma/$pkgver/$pkgname-$pkgver.tar.xz{,.sig}
-#kdebug-455807.patch::"https://invent.kde.org/plasma/kwin/-/commit/66d127879461aed2e6c6312d52219502a6354f71.patch" #also fix 455783 and 455633
 improve-fd18401.patch::"https://invent.kde.org/plasma/kwin/-/commit/fd18401dbf8cc876e6716ee76ac75ea2f24091cc.patch"
 kdebug-456089.patch::"https://invent.kde.org/plasma/kwin/-/commit/e10ecec362bd0bb39d10ad17d4ac6e4f921254db.patch"
 kdebug-455477.patch::"https://invent.kde.org/plasma/kwin/commit/d4d4a05444e18963359f3fa6fe482ed6a419aa19.patch" #fix in 5.25.3
@@ -28,6 +27,14 @@ kdebug-456144.patch::"https://invent.kde.org/plasma/kwin/-/commit/524e65813b78e5
 kdebug-456133.patch::"https://invent.kde.org/plasma/kwin/commit/b079c8caa23f8b40733a45159f51607928596a4b.patch" #fix in 5.25.3
 kdebug-431259.patch::"https://invent.kde.org/plasma/kwin/commit/67f6a323f83dca99b7502fa1d8fe0bdc1b0db3cf.patch" #fix in 5.25.3
 0001-wayland-Introduce-IdleDetector.patch
+kdebug-456298.patch::"https://invent.kde.org/plasma/kwin/-/commit/913ca1d6e8cf06602816cd3c7f26b0c2a47bdbd7.patch" #fix in 5.25.3 I hope
+improve-a782d18c.patch::"https://invent.kde.org/plasma/kwin/-/commit/a782d18c592696acf7f786401b72318280858d25.patch" #fix in 5.25.3
+kdebug-456242.patch::"https://invent.kde.org/plasma/kwin/-/commit/abbbc0b72c6b4d120a1912ad07be870b2da8e7ef.patch" #fix in 5.26
+prepare-to-454937.patch::"https://invent.kde.org/plasma/kwin/-/commit/e04d9e1978f90229d2d8a410e1cb74265812fe88.patch"
+kdebug-454937.patch::"https://invent.kde.org/plasma/kwin/-/commit/155b3cd4907e619e2ae0ec4feca873a213f839d0.patch" #fix in 5.25.3
+improve-df1938b8.patch::"https://invent.kde.org/plasma/kwin/-/commit/df1938b8af46a1d033264afc9851b48d33c8632f.patch"
+kdebug-453745.patch::"https://invent.kde.org/plasma/kwin/-/commit/c49620658f24dde055c053cfa1aac6b22997b0d0.patch" #fix in 5.26
+kdebug-456349.patch::"https://invent.kde.org/plasma/kwin/-/commit/06db7fc7ff9631d6b4e8520d1817ad26da5ee89f.patch" #fix in 5.26
 )
 install=$pkgname.install
 sha256sums=('54741ea0de2348a688aad48c67916eb514a27ca6d5a14c1ead3a8e8defe553d7'
@@ -38,12 +45,20 @@ sha256sums=('54741ea0de2348a688aad48c67916eb514a27ca6d5a14c1ead3a8e8defe553d7'
             '44fdc53ea26be9449c9d3d2e93e9b746b244c08694fa53ea816fa5fe13b6f7ea'
             '5b8cc1acdb9a248c3890650af699d801399178fb3648e4479da9d78bc8639581'
             '69358ef6c99aa6a6dd8a5c4c0ce57c38664019f707bdb1ea7de7415749ca9b9c'
-            'b0b0ae1eb4c7f529334de01b91989cd31e58bfb22957ec167f82df1188e17e21')
+            'b0b0ae1eb4c7f529334de01b91989cd31e58bfb22957ec167f82df1188e17e21'
+            'f5d0aabb48fb398ac93b19b933fe72538c86f47368c34d69317c839ea3d2281b'
+            'c0ec3577b76e777e9082d382ee981632906b71b81efc71cf7d73977248964d0e'
+            '213b18a2a6e82054579151869295bc7a8b9b050a40d95880c084bbce548e4cb2'
+            '014ba6d96b81e03887d2694771a0e5e1c463c88ec9578420574e14b82c199b5c'
+            '53d4f0d58705e3bc630b3f0044ba51c2dcf99b9b77d272809c678af5d93724d3'
+            '86caa48e28b3f8d3c4a0eb0fc9b8ac3d611a77df91129eecd1896bef6e034aa3'
+            '606068e62cc06bdb60e5f9b4d22c8848aaead4999ea63a01947160b114a3bbf3'
+            'ba9f77cb72b29300a052da247fb15387eee167706e3ef23105d55ab00d9e11fd')
 validpgpkeys=('E0A3EB202F8E57528E13E72FD7574483BB57B18D'  # Jonathan Esk-Riddell <jr@jriddell.org>
               '0AAC775BB6437A8D9AF7A3ACFE0784117FBCE11D'  # Bhushan Shah <bshah@kde.org>
               'D07BD8662C56CB291B316EB2F5675605C74E02CF'  # David Edmundson <davidedmundson@kde.org>
               '1FA881591C26B276D7A5518EEAAF29B42A678C20') # Marco Martin <notmart@gmail.com>
-options=(debug)
+#options=(debug)
 
 prepare() {
 cd $pkgname-$pkgver

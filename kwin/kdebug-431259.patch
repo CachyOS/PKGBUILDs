@@ -1,0 +1,51 @@
+From 67f6a323f83dca99b7502fa1d8fe0bdc1b0db3cf Mon Sep 17 00:00:00 2001
+From: David Edmundson <kde@davidedmundson.co.uk>
+Date: Wed, 29 Jun 2022 14:34:26 +0100
+Subject: [PATCH] Write animation speed to kdeglobals
+
+When the animation slider moved to look and feel a UI was kept within
+the compositing KCM that was only visible for non Plasma users so they
+still had a way to access this.
+
+This non-plasma version still wrote to kwinrc. In theory this was fine
+unless you used both. We also hit an issue where a stray
+m_settings->save() call in `reenableGl` would sync the settings to the
+wrong place.
+
+This patch moves everything to write to kdeglobals and cleans up any old
+entries here.
+
+BUG: 431259
+(cherry picked from commit 0bb3eb2baf5b0a4c0aacbe23bf55c47c0a2c39fd)
+---
+ src/kcmkwin/kwincompositing/main.cpp | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
+diff --git a/src/kcmkwin/kwincompositing/main.cpp b/src/kcmkwin/kwincompositing/main.cpp
+index 239d9f90b4..2fab51e616 100644
+--- a/src/kcmkwin/kwincompositing/main.cpp
++++ b/src/kcmkwin/kwincompositing/main.cpp
+@@ -68,6 +68,10 @@ KWinCompositingKCM::KWinCompositingKCM(QWidget *parent, const QVariantList &args
+     , m_settings(new KWinCompositingSetting(this))
+ {
+     m_form.setupUi(this);
++
++    // AnimationDurationFactor should be written to the same place as the lnf to avoid conflicts
++    m_settings->findItem("AnimationDurationFactor")->setWriteFlags(KConfigBase::Global | KConfigBase::Notify);
++
+     addConfig(m_settings, this);
+ 
+     m_form.glCrashedWarning->setIcon(QIcon::fromTheme(QStringLiteral("dialog-warning")));
+@@ -210,6 +214,9 @@ void KWinCompositingKCM::save()
+ 
+     KCModule::save();
+ 
++    // This clears up old entries that are now migrated to kdeglobals
++    KConfig("kwinrc", KConfig::NoGlobals).group("KDE").revertToDefault("AnimationDurationFactor");
++
+     // Send signal to all kwin instances
+     QDBusMessage message = QDBusMessage::createSignal(QStringLiteral("/Compositor"),
+                                                       QStringLiteral("org.kde.kwin.Compositing"),
+-- 
+GitLab
+

@@ -1,0 +1,50 @@
+From df1938b8af46a1d033264afc9851b48d33c8632f Mon Sep 17 00:00:00 2001
+From: David Edmundson <kde@davidedmundson.co.uk>
+Date: Mon, 4 Jul 2022 16:02:22 +0100
+Subject: [PATCH] Fix flickering in slide effect with multi screen
+
+The slide effect translates all windows as we switch desktop. In a multi
+screen setup we don't want windows to enter a different screen during
+this animation.
+
+The current code masks everything to the current output. This is broken
+for any window that spans across screens even slightly. It will not be
+visible during the transform then appear on top at the end.
+
+The new algorithm is, for each screen in each window we crop the painted
+area to the intersection of the screen and the screen's translated
+position.
+---
+ src/effects/slide/slide.cpp | 8 ++++++--
+ 1 file changed, 6 insertions(+), 2 deletions(-)
+
+diff --git a/src/effects/slide/slide.cpp b/src/effects/slide/slide.cpp
+index e51376c97c..f2e5093601 100644
+--- a/src/effects/slide/slide.cpp
++++ b/src/effects/slide/slide.cpp
+@@ -282,16 +282,20 @@ void SlideEffect::paintWindow(EffectWindow *w, int mask, QRegion region, WindowP
+     }
+ 
+     for (EffectScreen *screen : effects->screens()) {
+-        QPoint translation = getDrawCoords(m_paintCtx.translation, screen);
++        QPoint translation;
+         if (isTranslated(w)) {
++            translation = getDrawCoords(m_paintCtx.translation, screen);
+             data += translation;
+         }
+ 
++        const QRect screenArea = screen->geometry();
++        const QRect croppedScreenArea = screenArea.translated(translation).intersected(screenArea);
++
+         effects->paintWindow(
+             w,
+             mask,
+             // Only paint the region that intersects the current screen and desktop.
+-            region.intersected(effects->clientArea(ScreenArea, w)).intersected(effects->clientArea(ScreenArea, screen, effects->currentDesktop())),
++            region.intersected(croppedScreenArea),
+             data);
+ 
+         if (isTranslated(w)) {
+-- 
+GitLab
+

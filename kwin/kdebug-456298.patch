@@ -1,0 +1,128 @@
+From 913ca1d6e8cf06602816cd3c7f26b0c2a47bdbd7 Mon Sep 17 00:00:00 2001
+From: Xaver Hugl <xaver.hugl@gmail.com>
+Date: Fri, 1 Jul 2022 02:41:06 +0200
+Subject: [PATCH] backends/drm: don't remove connectors the kernel doesn't
+ consider removed
+
+Removing connectors that are still powered leads to a mismatch in atomic
+commits: the crtc is still powered, but the connector also still there.
+If KWin tries to disable the crtc afterwards, the atomic commits fail because
+the connector needs to be disabled at the same time and it's missing from the
+atomic commit request.
+
+To fix this, whenever we fail to fetch information or get wrong data from
+the kernel (like 0 modes), use the cached information instead and keep the
+connector.
+
+BUG: 456298
+
+
+(cherry picked from commit a71146c999728b06654ba247644b6b22609f0dff)
+---
+ src/backends/drm/drm_gpu.cpp              | 50 ++++++++++-------------
+ src/backends/drm/drm_object_connector.cpp |  9 ++--
+ 2 files changed, 27 insertions(+), 32 deletions(-)
+
+diff --git a/src/backends/drm/drm_gpu.cpp b/src/backends/drm/drm_gpu.cpp
+index f5ba6d2f75..6aa2913a93 100644
+--- a/src/backends/drm/drm_gpu.cpp
++++ b/src/backends/drm/drm_gpu.cpp
+@@ -258,44 +258,38 @@ bool DrmGpu::updateOutputs()
+             return c->id() == currentConnector;
+         });
+         DrmConnector *conn = it == m_connectors.constEnd() ? nullptr : *it;
+-        bool updateSuccess = true;
+         if (!conn) {
+             conn = new DrmConnector(this, currentConnector);
+-            if (!conn->init()) {
++            if (!conn->init() || !conn->isConnected()) {
+                 delete conn;
+                 continue;
+             }
+             m_connectors << conn;
+             m_allObjects << conn;
+-        } else if (conn->updateProperties()) {
+-            removedConnectors.removeOne(conn);
+         } else {
+-            updateSuccess = false;
+-        }
+-        if (conn->isConnected() && updateSuccess) {
+-            if (conn->isNonDesktop() ? !findLeaseOutput(conn->id()) : !findOutput(conn->id())) {
+-                qCDebug(KWIN_DRM, "New %soutput on GPU %s: %s", conn->isNonDesktop() ? "non-desktop " : "", qPrintable(m_devNode), qPrintable(conn->modelName()));
+-                const auto pipeline = conn->pipeline();
+-                m_pipelines << pipeline;
+-                if (conn->isNonDesktop()) {
+-                    auto leaseOutput = new DrmLeaseOutput(pipeline, m_leaseDevice);
+-                    m_leaseOutputs << leaseOutput;
+-                } else {
+-                    auto output = new DrmOutput(pipeline);
+-                    m_drmOutputs << output;
+-                    m_outputs << output;
+-                    addedOutputs << output;
+-                    Q_EMIT outputAdded(output);
+-                }
+-                pipeline->setLayers(m_platform->renderBackend()->createPrimaryLayer(pipeline), m_platform->renderBackend()->createCursorLayer(pipeline));
+-                pipeline->setActive(!conn->isNonDesktop());
+-                pipeline->applyPendingChanges();
++            conn->updateProperties();
++            if (conn->isConnected()) {
++                removedConnectors.removeOne(conn);
++            } else {
++                continue;
+             }
+-        } else if (auto output = findOutput(conn->id())) {
+-            removeOutput(output);
+-        } else if (auto leaseOutput = findLeaseOutput(conn->id())) {
+-            removeLeaseOutput(leaseOutput);
+         }
++        qCDebug(KWIN_DRM, "New %soutput on GPU %s: %s", conn->isNonDesktop() ? "non-desktop " : "", qPrintable(m_devNode), qPrintable(conn->modelName()));
++        const auto pipeline = conn->pipeline();
++        m_pipelines << pipeline;
++        if (conn->isNonDesktop()) {
++            auto leaseOutput = new DrmLeaseOutput(pipeline, m_leaseDevice);
++            m_leaseOutputs << leaseOutput;
++        } else {
++            auto output = new DrmOutput(pipeline);
++            m_drmOutputs << output;
++            m_outputs << output;
++            addedOutputs << output;
++            Q_EMIT outputAdded(output);
++        }
++        pipeline->setLayers(m_platform->renderBackend()->createPrimaryLayer(pipeline), m_platform->renderBackend()->createCursorLayer(pipeline));
++        pipeline->setActive(!conn->isNonDesktop());
++        pipeline->applyPendingChanges();
+     }
+     for (const auto &connector : qAsConst(removedConnectors)) {
+         if (auto output = findOutput(connector->id())) {
+diff --git a/src/backends/drm/drm_object_connector.cpp b/src/backends/drm/drm_object_connector.cpp
+index 6847dd35a6..8c6eef2fb7 100644
+--- a/src/backends/drm/drm_object_connector.cpp
++++ b/src/backends/drm/drm_object_connector.cpp
+@@ -283,11 +283,12 @@ Output::RgbRange DrmConnector::rgbRange() const
+ 
+ bool DrmConnector::updateProperties()
+ {
+-    if (!DrmObject::updateProperties()) {
++    if (auto connector = drmModeGetConnector(gpu()->fd(), id())) {
++        m_conn.reset(connector);
++    } else if (!m_conn) {
+         return false;
+     }
+-    m_conn.reset(drmModeGetConnector(gpu()->fd(), id()));
+-    if (!m_conn) {
++    if (!DrmObject::updateProperties()) {
+         return false;
+     }
+     if (const auto &dpms = getProp(PropertyIndex::Dpms)) {
+@@ -337,7 +338,7 @@ bool DrmConnector::updateProperties()
+     for (int i = 0; equal && i < m_conn->count_modes; i++) {
+         equal &= checkIfEqual(m_driverModes[i]->nativeMode(), &m_conn->modes[i]);
+     }
+-    if (!equal) {
++    if (!equal && (m_driverModes.empty() || m_conn->count_modes > 0)) {
+         // reload modes
+         m_driverModes.clear();
+         for (int i = 0; i < m_conn->count_modes; i++) {
+-- 
+GitLab
+
