@@ -12,4 +12,4 @@ do
 done
 
 mv */*-x86_64_v3.pkg.tar.zst* /home/ptr1337/.docker/build/nginx/www/repo/x86_64_v3/cachyos-v3/
-repoctl update -P cachyos-v3
+update-repo-v3
