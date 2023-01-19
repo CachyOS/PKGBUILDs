@@ -2,7 +2,7 @@
 # Maintainer: Piotr Gorski <lucjan.lucjanov@gmail.com>
 # Maintainer : Solomon Choina <shlomochoina@gmail.com>
 pkgname=falkon-git
-pkgver=22.07.80.74.g0341cc577
+pkgver=23.03.70.r6184.g0341cc577
 pkgrel=1
 pkgdesc="Cross-platform Qt Web Browser"
 arch=('i686' 'x86_64')
@@ -25,10 +25,8 @@ sha256sums=('SKIP'
 
 pkgver() {
   cd "${pkgname%-*}"
-  ( set -o pipefail
-    git describe --long --tags | sed 's/^v//;s/-/./g' ||
-    printf "r%s.%s" "$(git rev-list --count HEAD)" "$(git rev-parse --short HEAD)"
-  )
+  _ver="$(cat CMakeLists.txt | grep -m3 -e _VERSION_MAJOR -e _VERSION_MINOR -e _VERSION_MICRO | grep -o "[[:digit:]]*" | paste -sd'.')"
+   echo "${_ver}.r$(git rev-list --all --count).g$(git rev-parse --short HEAD)"
 }
 
 build() {
