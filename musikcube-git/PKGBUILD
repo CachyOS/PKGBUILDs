@@ -2,9 +2,9 @@
 # Maintainer: Hans-Nikolai Viessmann <hans AT viess DOT mn
 
 pkgname=musikcube-git
-pkgver=0.98.0.r57.ga42efaa9
+pkgver=0.98.1.r0.g636542c6b
 pkgrel=1
-pkgdesc="A terminal-based cross-platform music player, audio engine, metadata indexer, NO server. (no httpserver, alsa output)"
+pkgdesc="A terminal-based cross-platform music player, audio engine, metadata indexer, and server. (no httpserver, alsa output)"
 arch=('x86_64' 'x86_64_v3')
 url="https://github.com/clangen/musikcube"
 license=('BSD')
@@ -13,9 +13,9 @@ depends=('faad2' 'ffmpeg' 'libev' 'libogg' 'libvorbis' 'flac' 'lame'
 makedepends=('cmake' 'git')
 provides=('musikcube')
 conflicts=('musikcube')
-source=('musikcube::git+https://github.com/clangen/musikcube.git')
+source=('musikcube::git+https://github.com/clangen/musikcube.git#tag=0.98.1')
 md5sums=('SKIP')
-options=(!buildflags !debug strip lto)
+options=('!buildflags' '!debug' 'strip' 'lto')
 
 pkgver() {
     cd "$srcdir/${pkgname%-git}"
@@ -40,6 +40,7 @@ prepare() {
 	sed -iE 's|add_plugin("src/plugins/macosmediakeys" "macosmediakeys")||g' CMakeLists.txt
 	## remove few plugins dirs
 	\rm -rv src/plugins/{libopenmptdecoder,httpdatastream,macos*,win32*,pulseout,pipewireout,sndioout*,coreaudioout,mpris,server}
+	# \rm -rv src/3rdparty/include/websocketpp
 
 }
 
@@ -66,8 +67,4 @@ package() {
     make -C build DESTDIR="$pkgdir/" install
 
     install -Dm644 "LICENSE.txt" "${pkgdir}/usr/share/licenses/${pkgname}/LICENSE.txt"
-	# temp symlink lib .so file
-	mkdir -p "${pkgdir}/usr/lib"
-	cd "${pkgdir}"
-	ln -sf "/usr/share/musikcube/libmusikcore.so" "${pkgdir}/usr/lib/libmusikcore.so"
 }

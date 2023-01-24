@@ -1,6 +1,6 @@
 pkgbase = musikcube-git
-	pkgdesc = A terminal-based cross-platform music player, audio engine, metadata indexer, NO server. (no httpserver, alsa output)
-	pkgver = 0.97.0.r26.ge4593ba0
+	pkgdesc = A terminal-based cross-platform music player, audio engine, metadata indexer, and server. (no httpserver, alsa output)
+	pkgver = 0.99.0.r0.g4388bb510
 	pkgrel = 1
 	url = https://github.com/clangen/musikcube
 	arch = x86_64
@@ -26,7 +26,7 @@ pkgbase = musikcube-git
 	options = !debug
 	options = strip
 	options = lto
-	source = musikcube::git+https://github.com/clangen/musikcube.git
+	source = musikcube::git+https://github.com/clangen/musikcube.git#tag=0.98.1
 	md5sums = SKIP
 
 pkgname = musikcube-git
