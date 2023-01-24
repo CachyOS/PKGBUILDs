@@ -1,0 +1,41 @@
+# Maintainer: Alexander F. Rødseth <xyproto@archlinux.org>
+# Contributor: Bastien Dejean <nihilhill@gmail.com>
+
+pkgname=bspwm
+pkgver=0.9.10
+pkgrel=2.1
+groups=('modified')
+pkgdesc='Tiling window manager based on binary space partitioning - with rounded corners'
+arch=('x86_64' 'x86_64_v3')
+url='https://github.com/baskerville/bspwm'
+license=(BSD)
+makedepends=(git)
+depends=(xcb-util xcb-util-wm xcb-util-keysyms)
+optdepends=('sxhkd: to define keyboard and pointer bindings'
+            'xdo: for the example panel')
+source=("git+$url#commit=2492695ad47c7ae8c630bdf22328334f57e41c1a"
+        "rounded-corners.patch::https://github.com/j-james/bspwm-rounded-corners/commit/00e85df0505d2bfbd41234d1daf2f03c461b6a2b.patch")
+sha256sums=('SKIP'
+            'c2b4a2761c20087e6e9a1d156edf69fbb0268f6c5b42efb2572980b68a84cd3b')
+options=('lto' '!debug' 'strip')
+
+prepare() {
+  patch -d "$pkgname" -p1 -i ../rounded-corners.patch
+}
+
+build() {
+  CFLAGS+=' -fcommon' # https://wiki.gentoo.org/wiki/Gcc_10_porting_notes/fno_common
+  make -C "$pkgname" PREFIX=/usr
+}
+
+package() {
+  cd "$pkgname"
+
+  make PREFIX=/usr DESTDIR="$pkgdir" install
+
+  # BSD 2-clause
+  install -Dm644 LICENSE "$pkgdir/usr/share/licenses/$pkgname/LICENSE"
+}
+
+# getver: -u 2 raw.githubusercontent.com/baskerville/bspwm/master/doc/bspwm.1
+# vim: ts=2 sw=2 et:

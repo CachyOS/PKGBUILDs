@@ -1,0 +1,24 @@
+pkgbase = bspwm
+	pkgdesc = Tiling window manager based on binary space partitioning - with rounded corners
+	pkgver = 0.9.10
+	pkgrel = 2.1
+	url = https://github.com/baskerville/bspwm
+	arch = x86_64
+	arch = x86_64_v3
+	groups = modified
+	license = BSD
+	makedepends = git
+	depends = xcb-util
+	depends = xcb-util-wm
+	depends = xcb-util-keysyms
+	optdepends = sxhkd: to define keyboard and pointer bindings
+	optdepends = xdo: for the example panel
+	options = lto
+	options = !debug
+	options = strip
+	source = git+https://github.com/baskerville/bspwm#commit=2492695ad47c7ae8c630bdf22328334f57e41c1a
+	source = rounded-corners.patch::https://github.com/j-james/bspwm-rounded-corners/commit/00e85df0505d2bfbd41234d1daf2f03c461b6a2b.patch
+	sha256sums = SKIP
+	sha256sums = c2b4a2761c20087e6e9a1d156edf69fbb0268f6c5b42efb2572980b68a84cd3b
+
+pkgname = bspwm
