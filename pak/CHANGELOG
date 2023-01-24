@@ -1,0 +1,378 @@
+1.0 (June 3, 2018)
+	GitLab initial commit (migration from GitHub)
+
+1.1 (July 13, 2018)
+	Added support for user configuration file
+
+1.2 (July 29, 2018)
+	Added possibility to choose the repository asp is downloading PKGBUILD from
+
+1.3 (July 30,2018)
+	Added more pacman's abilities
+
+1.4 (July 31, 2018)
+	Added polish translation
+	Added support of .mo translations
+	Added configuration option to supress AUR warnings
+	Pacman's flags requiring sudo are separated from the rest
+
+1.4.3 (August 05, 2018)
+	Changed versioning of package to proper one (issued by pavbaranov at #archlinux.org.pl)
+	Fixed a bug with EDITOR env - issued by pavbaranov at #archlinux.org.pl
+	Added info about installed VCS packages in update function
+	Fixed missing translation
+
+1.4.6 (August 10, 2018)
+	Added simple warning about AUR dependencies (requested by pavbaranov at #archlinux.org.pl)
+	Cleaner code and visuals
+
+1.4.7 (August 10, 2018)
+	Improved resolving of AUR dependencies
+
+1.5 (August 12, 2018)
+	Added printing of AUR comments 'pak -SiA'
+	Added proper credits to developers of other programs 'pak' is based on
+
+1.5.1 (August 13, 2018)
+	Modified the warning if dependencies were not found in official repositories
+
+1.5.2 (August 13, 2018)
+	The list of installed VCS packages rebuilt (new types of packages added)
+
+1.5.3 (August 15, 2018)
+	Added possibility to choose your download folder when running 'pak -G/-GA' (requested by pavbaranov at #archlinux.org.pl)
+	Fixed printing of AUR comments
+	Added possibility to choose between checking VCS packages upstream or printing them on screen
+
+1.5.4 (August 18, 2018)
+	Added 'makepkg' error code checking
+
+1.6 (August 26, 2018)
+	Added namcap validation of PKGBUILD and built packages (requested by pavbaranov at #archlinux.org.pl)
+
+1.7 (September 6, 2018)
+	New 'pak -SS/-SI'
+	Improved checking of errors
+
+1.8 (October 27, 2018)
+	Added man pages pak(8), pak.conf(5)
+	Fixed an issue with built packages not being moved to $PKGDEST
+	Improved resolving of AUR dependencies
+	Improved printing of installed VCS packages
+
+1.9 (November 18, 2018)
+	New support for reflector 'pak -m'
+	AUR warnings are printed before the list of upgradable packages (similar to pacman's output)
+	Improved 'pak -G'
+	Fixed an issue with asp downloading from wrong sources
+
+1.9.1 (December 28, 2018)
+	New 'pak --vcs/vcs'
+	New 'pak -GB'
+	Full -Syu before installing/updating AUR packages (issued by pavbaranov at #archlinux.org.pl)
+
+1.9.2 (December 29, 2018)
+	New 'pak -C/clean'
+	Added 'checkupdates' and 'updpkgsums' into the code (pacman-contrib)
+
+1.9.3 (December 31, 2018)
+	New 'pak -L/-Li/-Lr/-Lu' - grepping pacman.log
+
+2.0 (February 9, 2019)
+	auracle-git replaced cower
+
+2.1 (March 14, 2019)
+	Fixed 'pak -m' when passing own parameters to the reflector (issued by pavbaranov at #archlinux.org.pl)
+	Dropping privileges after few sudos (sudo -k)
+
+2.2 (March 16, 2019)
+	Added bash-completion support
+	Added zsh-completions support
+
+2.2.1 (March 22, 2019)
+	Fixed package name and version spacing in 'update' function
+	Fixed grepping pkgver and pkgrel - issued by slawul at #archlinux.org.pl
+	Fixed the build function to properly respect makepkg.conf settings (issued by slawul at #archlinux.org.pl)
+
+2.3 (March 30, 2019)
+	New 'pak -Ls'
+	New 'pak vcs'
+
+2.3.1 (April 7, 2019)
+	Fixed -GA (when pkgname doesn't match pkgbase) + added info about it in -GA -SA (issued by pavbaranov #archlinux.org.pl)
+
+2.3.2 (April 25, 2019)
+	Fixed completing of filesystem paths in bash-completion and zsh-completions	(issued by pavbaranov #archlinux.org.pl)
+
+2.3.3 (May 2, 2019)
+	Fixed a bug, when epoch wasn't taken into account during 'pacman -U' step
+	Added missing 'downgrade' transactions to 'pak -L*'
+
+2.4 (July 13, 2019)
+	New 'pak --list/list': piping pacman -Qq through fzf for inspection of installed packages
+	New 'pak -C/check': checkupdates, auracle sync, pacman -Qttdq
+	Moved AUR warnings and VCS list from 'pak update' to 'pak check'
+	Added checking packages versions using vercmp in 'pak update' and 'pak vcs'
+	Fixed resolving dependencies if package name contains weird symbols
+	Added a test during 'auracle sync', if no foreign package has been found
+	Added update-aur function, by pulling out relevant code from update()
+
+2.4.1 (August 8, 2019)
+	Added vim folding markers to the code
+	Added 'show_user_conf_warning' to pak.conf
+
+2.5 (August 31, 2019)
+	Added pacdiff for checking pacsave/pacnew files -> pak check
+	AUR packages: respecting IgnorePkg from /etc/pacman.conf
+
+3.0 (September 9, 2019)
+	Added support for POLAUR repositories
+	POLAUR: added search results to 'pak -SS'
+	POLAUR: 'pak -P/-Py/-Ps/-Pr'
+
+3.1 (September 10, 2019)
+	Fixed printing html chars in polaur-news
+	Fixed some user Y/n selections
+
+3.1.1 (September 22, 2019)
+	Credits: link to reflector's sources
+
+3.1.2 (September 26, 2019)
+	pak -P: usage clarification in help and man pages
+
+3.2 (October 20, 2019)
+	pak -SA: additional error is put on screen when package (or pkgbase) is not found in AUR
+	New dependencies due to changes in Arch Linux base in PKGBUILD
+	Added changelog to PKGBUILD (pacman's -Qc support)
+
+3.2.1 (October 28, 2019)
+	NEW -Ld flag, that separates downgraded packages from installed
+	Improved pacman.log parsing due to changes in the time format
+	Reduced the size of cloned git repositories (AUR + POLAUR) (issued by pavbaranov #archlinux.org.pl)
+	AUR: Improved cleaning the caches from source files
+	Fixed -Ps when the cache directory has been changed to non-default
+	Improved -Ps: if package is already installed, the local version is being displayed
+	Updated polish translation
+	Updated man pages
+
+3.3 (October 29, 2019)
+	NEW: added support for desktop notifications
+	- systemctl --user enable --now pak-checkupdates.timer
+	- systemctl --user enable --now pak-auracle.timer
+	Reverted POLAUR git clone/pull to full depth
+
+3.3.1 (October 30, 2019)
+	Modified systemd services to remove /tmp files after notification has been sent
+	Modified timers: pak-checkupdates runs every 120min, pak-auracle runs every 24h (issued by pavbaranov #archlinux.org.pl)
+	Removed all libalpm hooks
+
+3.3.2 (October 31, 2019)
+	Fixed an issue when /var/log/pacman.log is treated by grep as a binary file (issued by pavbaranov #archlinux.org.pl)
+
+3.4 (November 03, 2019)
+	Full polish translation of man pages
+	Changed default cache dir paths in pak.conf
+
+3.5 (November 07, 2019)
+	Improved keeping .cache folders in clean state after install/upgrade operations
+	More verbose 'pak -Sc' and 'pak clean-aur'
+	Printing differences between new and old PKGBUILDs, before asking to edit it
+	Added "show_diff=0/1" to pak.conf
+	Added tests to validate user pak.conf file
+	Changed 'auracle sync' to the new 'auracle outdated'
+
+3.5.1 (November 09, 2019)
+	Fixed typos in polish translation
+	Added IgnorePkg description to man pages
+
+3.5.2 (November 11, 2019)
+	Improved 'pak -Sc', specifficaly clean-aur part
+	Visually rewritten 'pak clean-aur'
+
+3.5.3 (December 03, 2019)
+	pak -Sc: added "$download_path" to the list of dirs to clean up
+	Notifications reduced to 50 lines
+	Fix: substitute '+' with '%2B' in AUR packages names (issued by pavbaranov #archlinux.org.pl)
+	Fix: workaround with auracle search and '+' signs in packages names
+
+3.6 (December 22, 2019)
+	NEW list-by-repos/--list-by-repos flags
+	Updated man pages
+	Visual fixes
+
+3.6.1 (December 22, 2019)
+	Improved grepping in list-by-repos/--list-by-repos flags
+
+3.6.2 (December 31, 2019)
+	Improved AUR comments: apms replaced by proper chars
+	AUR: print proper changelist during installation
+	Fixed resolving dependencies with '+' in names
+	Improved credits in man pages to reflect the numer (and weight) of contributions
+
+3.7 (January 23, 2020)
+	Y/n confirmations don't progress with single Enter anymore
+	More strict parsing on makepkg_flags
+	pak.conf: added support for 0 values in reflector options
+
+3.8 (January 23, 2020)
+	Initial support for updating packages from POLAUR
+
+3.9 (January 26, 2020)
+	NEW: --downgrade (requested by pavbaranov #archlinux.org.pl)
+	Y/n: reversed most to previous version
+	Improved POLAUR support
+
+3.9.1 (January 26, 2020)
+	Fixed missing Y/n changes (issued by pavbaranov #archlinux.org.pl)
+	Rewritten --downgrade (issued by pavbaranov #archlinux.org.pl)
+	NEW: -d
+
+3.99 (February 03, 2020)
+	NEW: -GP | download-polaur (requested by pavbaranov #archlinux.org.pl)
+
+4.0 (February 14, 2020)
+	Added: automatic update of POLAUR in -Syu and -P (requested by pavbaranov #archlinux.org.pl)
+	Added: show_polaur_info to pak.conf
+	NEW: -rd / rev-deps
+	Fixed: -SsA
+	Removed: POLAUR/wip repository (requested by pavbaranov)
+
+4.1 (February 19, 2020)
+	Fixed: epoch finding in POLAUR packages
+	Fixed: vcs packages in POLAUR
+
+4.1.1 (February 19, 2020)
+	Fixed: -Ps - packages versions printing including epoch
+
+4.1.2 (February 22, 2020)
+	Fixed: unnecessary permissions increasing while passing -h/--help (issued by pavbaranov #archlinux.org.pl)
+
+4.1.3 (February 28, 2020)
+	Fixed: installing and removing *-headers packages (issued by pavbaranov #polaur)
+
+4.1.4 (March 06, 2020)
+	Fixed: -GA downloading from AUR (issued by lami07 #polaur)
+
+4.2 (March 17, 2020)
+	NEW: pak -Pl/polaur-list
+	Changed: 'pak -Syyu' doesn't force refreshing mirrors anymore
+	Fixed: pak -m with new reflector (issued by robson1 #archlinux.org.pl)
+
+4.3 (March 20, 2020)
+	NEW: 'pak -Syu' updates core system packages as well if new versions were found in POLAUR (disabled by default)
+	NEW: pak.conf option - upd_repo_pkgs_from_polaur=0/1
+	Changed: 'pak -C' to reflect above ^
+	Added: checking for working internet connection
+	Reverted: 'pak -Syyu' works as before (requested by LinGruby #polaur)
+	Changed: 'pak -Pl' prints available repositories
+	Changed: 'pak -Pl repository' prints available packages
+	Changed: 'pak --vsc package' checks only for given package
+	Changed: warning for unsupported vcs packages (requested by pavbaranov #polaur)
+	Updated: manpages
+
+4.4 (March 26, 2020)
+	Update: big rewrite of most POLAUR code to speed it up a little
+
+4.4.1 (March 28, 2020)
+	Fixed: removed left-overs: 'echo' in -Ps (issued by pavbaranov #polaur)
+
+4.4.2 (March 29, 2020)
+	Fixed: updates from POLAUR (issued by LinGruby #polaur)
+
+4.4.3 (March 29, 2020)
+	Added: POLAUR repo names with package name to update 'pak -Pyu -C'
+
+4.5 (April 01, 2020)
+	Changed: complete rewrite of checking VCS for updates
+
+4.6 (June 16, 2020)
+	Fixes due to changes in auracle's locales support
+	Improvements in VCS checking
+	Improvements in mirrors checking when the mirrorlist is empty (issued by pavbaranov #polaur)
+
+4.7 (June 28, 2020)
+	NEW: pak archnews (number) (requested by pavbaranov #polaur)
+	Added: printing the last two news before updating stage
+	Added: pak -C -> printing the last two news at the beginning
+
+5.0 (July 23, 2020)
+	Changed: all POLAUR -Px flags to corresponding pacman flags
+	Changed: visuals when printing ArchLinux news
+	Added: separate flags to display PKGBUILDs from AUR and POLAUR
+	Added: more info to -SiP, similar as -Si, -SiA
+	Improved: --list-polaur
+	Fixes due to changes in the new asp 6
+
+5.1 (August 24, 2020)
+	Added: pak -SyuA
+	Improved: pak --vcs
+	Improved: online checking
+
+5.1.1 (August 25, 2020)
+	Fixed left-overs: pak -Py to pak -SyP
+
+5.1.2 (August 25, 2020)
+	Improved: the ping command to reduce start timeouts when it's being run on other 'fluffy' network configurations
+
+5.1.3 (September 30, 2020)
+	Visual output improved
+
+5.1.4 (October 24, 2020)
+	Improved: -G, -GA, -GB (requested by pavbaranov #polaur + more)
+
+5.1.5 (November 04, 2020)
+	New: -ScP compress POLAUR git repositories
+	pak -d: sudo -k downgrade (upstream -> downgrade doesn't run without root priviledges anymore)
+
+5.1.6 (November 14, 2020)
+	pak -NP: better URLs parsing
+	Fixed: pak -Li/-Lu/-Lr/-Ld
+	Redone: pak -SsP searches in package names and descriptions
+
+5.1.7 (December 20, 2020)
+	Added: print PKGBUILD before installing from POLAUR (requested by LinGruby)
+	Changed: pak --vcs, new way to list VCS packages
+	Fixed: pak news-arch
+
+5.1.8 (December 21, 2020)
+	pak -m: fixed upstream bug in reflector's mirrorlist (issued by robson)
+
+5.1.9 (January 11, 2021)
+	NEW: pak -Sll (alias to --list-by-repos)
+
+5.2 (April 21, 2021)
+	NEW: -SU as a replacement for -Syu
+	pak -Syu now is being passed directly to pacman
+	pak -Ls: more precise searching
+	Added: support for IgnorePkg to POLAUR part
+	Fixed: -NA arch news parsing
+
+5.2.1 (May 05, 2021)
+	Fixed: program terminates when makedepends are being kept after successful build (issued by pavbaranov #archlinux.org.pl)
+	NEW: bash/zsh completions for polaur repo-names
+
+5.3 (July 06, 2021)
+	NEW: --list-remote; fzf based list of available packages from repositories
+	NEW: --list-local; fzf based list of installed packages (a.k.a. --list)
+	Removed forcing of pacman-git when --vcs
+
+5.4 (February 09, 2022)
+	Fixed: IgnorePkg support for AUR/POLAUR
+	Modified: freenode links to libera
+
+5.4.1 (April 08, 2022)
+	Fixed: fetching polaur repo names, due to changes in github
+
+5.4.2.1 (May 03, 2022)
+	Fixed: makepkg_flags
+	Fixed: mv .sig files to pacman pkg cache along with the built package
+
+5.5 (May 22, 2022)
+	Modified: keyrings packages are updated first before others
+	Reverted: -Syu and -SU are combined again
+
+5.5.1 (May 22, 2022)
+	Fixed: -S* flags
+
+5.5.2 (May 23, 2022)
+	Reverted: -Syyu, -Syyuu to default pacman actions
