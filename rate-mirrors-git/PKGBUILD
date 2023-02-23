@@ -1,0 +1,41 @@
+# Maintainer: Piotr Gorski <lucjan.lucjanov@gmail.com>
+# Contributor: Nikita Almakov <nikita.almakov@gmail.com>
+
+pkgname=rate-mirrors-git
+gitname=rate-mirrors
+pkgver=0.15.0.r0.g8a44cad
+pkgrel=1
+pkgdesc="Everyday-use client-side map-aware mirror ranking tool"
+url="https://github.com/westandskif/rate-mirrors"
+license=('custom')
+options=(!lto)
+source=("git+https://github.com/westandskif/rate-mirrors")
+arch=('x86_64')
+depends=('gcc-libs')
+makedepends=('cargo' 'git')
+conflicts=('rate-mirrors')
+provides=('rate-mirrors')
+sha512sums=('SKIP')
+
+pkgver() {
+  cd "$gitname"
+
+  git describe --long --tags | sed 's/^v//;s/\([^-]*-g\)/r\1/;s/-/./g'
+}
+
+build() {
+  cd "$gitname"
+
+  export RUSTUP_TOOLCHAIN=nightly
+  export CARGO_TARGET_DIR=target
+  cargo build --release --locked
+}
+
+package() {
+  cd "$gitname"
+
+  install -Dm755 "target/release/rate_mirrors" "$pkgdir/usr/bin/${gitname}"
+  install -Dm644 "LICENSE" "$pkgdir/usr/share/licenses/${gitname}/LICENSE"
+}
+
+#vim: syntax=sh
