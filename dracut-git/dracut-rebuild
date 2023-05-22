@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+#
+# Rebuild the initrds for all kernels found in /usr/lib/modules
+#
+# Run dracut for all the installed kernels
+
+# This script requires passing a valid file to regenerate all initrds so we pass a file we know will exist
+/usr/share/libalpm/scripts/dracut-install < "/usr/bin/dracut-rebuild"
