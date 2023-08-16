@@ -1,25 +1,26 @@
 # Maintainer: nycko123 <nycko123 at gmail dot com>
+# Maintainer: Piotr Gorski <lucjan.lucjanov@gmail.com>
 # Contributor: pavbaranov <pavbaranov at gmail dot com>
 
 # You had to install all optdepends for full functionality of this script
 
 pkgname=pak-git
 epoch=1
-pkgver=5.4.1.r1.g921d26a
+pkgver=5.5.3.r10.g390528f
 pkgrel=1
-pkgdesc="Simple pacman wrapper, AUR and POLAUR helper"
+pkgdesc="Simple pacman and AUR frontend, POLAUR helper"
 arch=('any')
 url="https://gitlab.com/nycko123/pak"
 license=('GPL')
 depends=('bash' 'git' 'curl' 'jq' 'pacman-contrib' 'man-db')
-optdepends=("asp: to download PKGBUILDs of official packages"
-			"auracle-git: (AUR) to manage AUR packages"
-			"namcap: to validate built packages"
-			"reflector: to keep mirrorlist up to date"
-			"subversion: to check upstream for updated -svn packages"
-			"fzf: to display all data about installed packages"
-			"downgrade: (AUR) to downgrade packages"
-			"libnotify: to display desktop notifications")
+optdepends=("devtools: to download PKGBUILDs of official packages"
+            "auracle-git: (AUR) to manage AUR packages"
+            "namcap: to validate built packages"
+            "reflector: to keep mirrorlist up to date"
+            "subversion: to check upstream for updated -svn packages"
+            "fzf: to display all data about installed packages"
+            "downgrade: (AUR) to downgrade packages"
+            "libnotify: to display desktop notifications")
 backup=(etc/xdg/pak.conf)
 conflicts=(pak)
  
