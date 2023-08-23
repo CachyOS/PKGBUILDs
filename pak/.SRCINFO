@@ -1,6 +1,6 @@
 pkgbase = pak
 	pkgdesc = Simple pacman wrapper, AUR and POLAUR helper
-	pkgver = 5.5.3
+	pkgver = 5.6
 	pkgrel = 1
 	epoch = 1
 	url = https://gitlab.com/nycko123/pak
@@ -13,7 +13,7 @@ pkgbase = pak
 	depends = jq
 	depends = pacman-contrib
 	depends = man-db
-	optdepends = asp: to download PKGBUILD's of official packages
+	optdepends = devtools: to download PKGBUILD's of official packages
 	optdepends = auracle-git: (AUR) to manage AUR packages
 	optdepends = namcap: to validate built packages
 	optdepends = reflector: to keep mirrorlist up to date
@@ -23,7 +23,7 @@ pkgbase = pak
 	optdepends = libnotify: to display desktop notifications
 	conflicts = pak-git
 	backup = etc/xdg/pak.conf
-	source = https://gitlab.com/nycko123/pak/raw/master/src/pak-5.5.3.tar.gz
-	sha256sums = 2cf1465fd9e63efe9c97dc1353b722aa7061fd01ea8f41eaab0a82588a6855f8
+	source = https://gitlab.com/nycko123/pak/raw/master/src/pak-5.6.tar.gz
+	sha256sums = e2f9d8afe833690319a27844a909c44db6ab7e4b87601ccb0ce5af313ea3a06e
 
 pkgname = pak

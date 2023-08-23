@@ -376,3 +376,14 @@
 
 5.5.2 (May 23, 2022)
 	Reverted: -Syyu, -Syyuu to default pacman actions
+
+5.5.3 (January 21, 2023)
+	Fixed: removed backslashes in grep (issued by pavbaranov)
+
+5.6 (August 23, 2023)
+	Added: download_ask to pak.conf (requested by ludvick forum.archlinux.org)
+	Added: rm_src_ask to pak.conf
+	Added: pkgctl support (devtools)
+	Removed: asp support
+	Changed: visuals in --vcs, -G, -GF
+	Updated: manpages, polish translation

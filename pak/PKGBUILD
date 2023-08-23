@@ -5,14 +5,14 @@
 
 pkgname=pak
 epoch=1
-pkgver=5.5.3
+pkgver=5.6
 pkgrel=1
 pkgdesc="Simple pacman wrapper, AUR and POLAUR helper"
 arch=('any')
 url="https://gitlab.com/nycko123/pak"
 license=('GPL')
 depends=('bash' 'git' 'curl' 'jq' 'pacman-contrib' 'man-db')
-optdepends=("asp: to download PKGBUILD's of official packages"
+optdepends=("devtools: to download PKGBUILD's of official packages"
             "auracle-git: (AUR) to manage AUR packages"
             "namcap: to validate built packages"
             "reflector: to keep mirrorlist up to date"
@@ -26,7 +26,7 @@ conflicts=(pak-git)
 
 source=("https://gitlab.com/nycko123/pak/raw/master/src/${pkgname}-${pkgver}.tar.gz")
 
-sha256sums=('2cf1465fd9e63efe9c97dc1353b722aa7061fd01ea8f41eaab0a82588a6855f8')
+sha256sums=('e2f9d8afe833690319a27844a909c44db6ab7e4b87601ccb0ce5af313ea3a06e')
 
 package(){
  install -Dm755 "$srcdir/$pkgname" "$pkgdir/usr/bin/$pkgname"
