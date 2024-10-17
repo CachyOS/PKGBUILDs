@@ -2,19 +2,21 @@
 # Maintainer: Piotr Gorski <lucjan.lucjanov@gmail.com>
  
 pkgname=kooka-git
-pkgver=0.61.355.g089f9f8
+pkgver=0.61.810.g0cff6a5
 pkgrel=1
-pkgdesc='The scanning application and libkscan library for Plasma 5'
+pkgdesc='The scanning application and libkscan library for Plasma 6'
 arch=('x86_64')
 url="https://userbase.kde.org/Kooka"
-license=('GPL3')
-depends=('kio' 'sane' 'libpaper')
+license=('GPL-3')
+#depends=('kio' 'sane' 'libpaper' 'purpose' 'kxmlgui' 'ktextwidgets')
+depends=('sane' 'kxmlgui' 'kconfigwidgets' 'kconfig' 'kio' 'purpose' 'ki18n' 'kcoreaddons' 'kcrash' 'kcolorscheme' 'kservice' 'libpaper' 'kiconthemes' 'ktextwidgets' 'kwidgetsaddons' 'kcompletion')
 makedepends=('extra-cmake-modules' 'git' 'kdoctools')
 optdepends=('ocrad' 'gocr')
 provides=("${pkgname%-*}")
 conflicts=("${pkgname%-*}")
 replaces=("${pkgname%-*}")
-source=('git+https://invent.kde.org/graphics/kooka.git')
+source=("git+https://invent.kde.org/graphics/${pkgname%-git}.git")
+
 sha256sums=('SKIP')
 
 pkgver() {
@@ -27,17 +29,16 @@ prepare() {
   }
     
 build() {
-  cd build
-  cmake ../kooka \
+  cmake -B build -S ${pkgname%-git} \
     -DCMAKE_BUILD_TYPE=Release \
     -DCMAKE_INSTALL_PREFIX=/usr \
     -DKDE_INSTALL_LIBDIR=lib \
+    -DQT_MAJOR_VERSION=6 \
     -DBUILD_TESTING=OFF
     
-  make
+  cmake --build build
   }
  
 package() {
-    cd build
-    make DESTDIR="${pkgdir}/" install
+    DESTDIR="$pkgdir" cmake --install build
   }
