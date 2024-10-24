@@ -2,14 +2,43 @@
 # Contributor: Gustavo Alvarez <sl1pkn07@gmail.com>
 
 pkgname=krusader-stable-git
-pkgver=2.7.3.dev.r5986.g33171bf4
+pkgver=2.9.0.dev.r7089.g715b83551
 pkgrel=1
 pkgdesc="Advanced twin panel file manager for KDE. (GIT version)"
 arch=('x86_64')
 url='http://www.krusader.org'
 license=('GPL')
-depends=('kparts' 'hicolor-icon-theme')
-makedepends=('extra-cmake-modules' 'kdoctools' 'git')
+depends=(acl
+         gcc-libs
+         glibc
+         karchive
+         kbookmarks
+         kcodecs
+         kcompletion
+         kconfig
+         kconfigwidgets
+         kcoreaddons
+         kguiaddons
+         ki18n
+         kiconthemes
+         kio
+         kitemviews
+         kjobwidgets
+         knotifications
+         kparts
+         kservice
+         ktextwidgets
+         kwallet
+         kwidgetsaddons
+         kwindowsystem
+         kstatusnotifieritem
+         kxmlgui
+         qt6-base
+         solid
+         zlib)
+makedepends=(extra-cmake-modules
+             kdoctools
+             git)
 optdepends=('xz: LZMA and XZ archive support'
             'unzip: ZIP decompression support'
             'zip: ZIP archive support'
@@ -25,9 +54,7 @@ optdepends=('xz: LZMA and XZ archive support'
             'kde-cli-tools: manage file associations, root mode'
             'kompare: file contents comparison'
             'kdiff3: file contents comparison'
-            'krename: advanced rename tool'
-            'konsole: terminal'
-            'ktexteditor: file editing support')
+            'krename: advanced rename tool')
 provides=('krusader')
 conflicts=('krusader')
 source=('git+https://anongit.kde.org/krusader#branch=stable')
@@ -41,7 +68,7 @@ pkgver() {
 
 build() {
   cmake -B build -S krusader \
-    -DKDESU_PATH="/usr/lib/kf5/kdesu"
+    -DKDESU_PATH="/usr/lib/kf6/kdesu"
   cmake --build build
 }
 
