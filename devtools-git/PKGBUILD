@@ -3,14 +3,14 @@
 
 pkgname=devtools-git
 _pkgname=devtools
-pkgver=1.2.0.6.g0e2b16b
+pkgver=1.4.0.4.g3f0ebbc
 pkgrel=2
 epoch=1
 pkgdesc='Tools for Arch Linux package maintainers'
 arch=('any')
 license=('GPL')
 url='http://projects.archlinux.org/devtools.git/'
-depends=(
+ddepends=(
   arch-install-scripts
   awk
   bash
@@ -21,14 +21,17 @@ depends=(
   expac
   fakeroot
   findutils
+  glow
   grep
+  gum
   jq
   openssh
   parallel
+  reuse
   rsync
   sed
   util-linux
-
+  sudo
   breezy
   git
   mercurial
@@ -36,19 +39,22 @@ depends=(
 )
 makedepends=(
   asciidoctor
-  shellcheck
   git
 )
 checkdepends=(
   bats
 )
-optdepends=('btrfs-progs: btrfs support')
+optdepends=(
+  'btrfs-progs: btrfs support'
+  'bat: pretty printing for pkgctl search'
+  'nvchecker: pkgctl version subcommand'
+)
 provides=("devtools=$pkgver")
 conflicts=('devtools')
 source=("git+https://github.com/archlinux/devtools.git"
         "0001-makechrootpkg-add-paccache-flag.patch")
 md5sums=('SKIP'
-         '777c2abaa438e25696b4c8a3f5f7f262')
+         '5f052e1b6db7ea165643a5d0347fecb9')
 
 pkgver() {
   cd $_pkgname
